@@ -1,0 +1,29 @@
+---
+collections:
+  #- name: ./collections/files/infra-aap_configuration-3.4.1.tar.gz
+  #  type: file
+  #- name: ./collections/files/infra-ee_utilities-4.0.4.tar.gz
+  #  type: file
+  #- name: ./collections/files/infra-aap_utilities-2.7.0.tar.gz
+  #  type: file
+  #- name: ./collections/files/containers-podman-1.17.0.tar.gz
+  #  type: file
+  #- name: ./collections/files/ansible-platform-2.5.20250702.tar.gz
+  #  type: file
+  #- name: ./collections/files/ansible-hub-1.0.0.tar.gz
+  #  type: file
+  #- name: ./collections/files/ansible-controller-4.6.18.tar.gz
+  #  type: file
+  #- name: ./collections/files/ansible-eda-2.8.2.tar.gz
+  #  type: file
+
+  #- name: infra.app_configuration
+  #- name: infra.ee_utilities
+  #- name: infra.aap_utilities
+  #- name: containers.podman
+  - name: ansible.platform
+  - name: ansible.hub
+  - name: ansible.controller
+  - name: ansible.eda
+
+...

@@ -1,0 +1,31 @@
+---
+# Playbook to backup AAP
+
+- name: Backup AAP
+  hosts: localhost
+  become: true
+  vars:
+    #aap_setup_prep_setup_dir: /root/ansible-automation-platform-installer/
+    #aap_backup_dest: /aap_backups/
+  roles:
+    - infra.aap_utilities.aap_backup
+
+  tasks:
+    - name: Send the backup to s3 bucket
+    # amazon.aws.s3_sync:
+      debug:
+        msg: "Here you can add tasks to send the backup to an S3 bucket or another remote location."
+
+    - name: Get backup name from today
+      command: ls -t {{ aap_backup_dest }} | head -n1
+      register: backup_name #Example output: aap-backup-2024-06-12-14:30:00
+
+    # It's possible to get the day with date: date +"aap-openshift-backup-%Y-%m-%d-%T"
+
+    #- name: Check backup name is less than 24h old
+    
+    - name: Create a symlink to the latest backup
+      file:
+        src: "{{ aap_backup_dest }}/{{ backup_name.stdout }}"
+        dest: "{{ aap_backup_dest }}/aap-backup-latest"
+        state: link
