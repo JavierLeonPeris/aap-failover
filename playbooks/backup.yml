@@ -3,29 +3,51 @@
 
 - name: Backup AAP
   hosts: localhost
-  become: true
-  vars:
-    #aap_setup_prep_setup_dir: /root/ansible-automation-platform-installer/
-    #aap_backup_dest: /aap_backups/
-  roles:
-    - infra.aap_utilities.aap_backup
+  #become: true
+  vars_files:
+    - ../vars/aap_vars.yml
+  #roles:
+  #  - infra.aap_utilities.aap_backup
 
   tasks:
-    - name: Send the backup to s3 bucket
-    # amazon.aws.s3_sync:
-      debug:
-        msg: "Here you can add tasks to send the backup to an S3 bucket or another remote location."
+    - name: Run backup from role
+      ansible.builtin.include_role:
+        name: infra.aap_utilities.aap_backup
+      async: "{{ aap_backup_async }}"
+      poll: "{{ aap_backup_poll }}"
+
+    #- name: Assume Role to access S3 bucket
+    #  amazon.aws.sts_assume_role:
+    #    region: "{{ s3_region }}"
+    #    role_arn: "myarn_role"
+    #    role_session_name: "AAPRoleSession"
+        #access_key: "{{ assumed_role.sts_creds.access_key }}"
+        #secret_key: "{{ assumed_role.sts_creds.secret_key }}"
+        #session_token: "{{ assumed_role.sts_creds.session_token }}"
+
+    - name: Create the S3 bucket
+      s3_bucket:
+        name: "{{ s3_bucket_name }}"
+        region: "{{ s3_region }}"
+        state: present
 
     - name: Get backup name from today
-      command: ls -t {{ aap_backup_dest }} | head -n1
-      register: backup_name #Example output: aap-backup-2024-06-12-14:30:00
-
-    # It's possible to get the day with date: date +"aap-openshift-backup-%Y-%m-%d-%T"
-
-    #- name: Check backup name is less than 24h old
-    
+      shell: "ls -t {{ aap_backup_dest }} | grep -v latest | head -n1"
+      register: backup_name #Example output: aap-backup-2024-06-12-14:30:00    
+          
     - name: Create a symlink to the latest backup
       file:
         src: "{{ aap_backup_dest }}/{{ backup_name.stdout }}"
         dest: "{{ aap_backup_dest }}/aap-backup-latest"
         state: link
+
+    - name: Simple PUT operation
+      amazon.aws.s3_object:
+        bucket: "{{ s3_bucket_name }}"
+        object: "backup/aap-backup-latest"
+        src: "{{ playbook_dir }}/{{ aap_backup_dest }}/aap-backup-latest"
+        mode: put
+        region: "{{ s3_region }}"
+
+
+

@@ -1,9 +1,23 @@
 ---
 - name: Restore AAP
   hosts: localhost
-  become: true
-  vars:
-    aap_setup_working_dir: /root/ansible-automation-platform-installer/
-    aap_restore_location: "{{playbook_dir}}/aap-backup-latest.tar.gz"
-  roles:
-    - infra.aap_utilities.aap_restore
+  #become: true
+  vars_files:
+    - ../vars/aap_vars.yml
+  tasks:
+    - name: Get backup from AWS bucket
+      amazon.aws.s3_object:
+        bucket: "{{ s3_bucket_name }}"
+        object: aap-backup-latest
+        dest: "{{ aap_restore_location }}"
+        mode: get
+        region: us-east-1
+
+    - name: Create the inventory file from template
+      ansible.builtin.template:
+        src: templates/inventory.j2
+        dest: "{{ aap_setup_working_dir }}/inventory"
+
+    - name: Restore AAP from backup
+      ansible.builtin.include_role:
+        name: infra.aap_utilities.aap_restore

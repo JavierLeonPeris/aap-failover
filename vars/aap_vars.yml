@@ -1,11 +1,16 @@
 ---
 # Backup variables
 aap_setup_prep_setup_dir: /root/ansible-automation-platform-installer/
-aap_backup_dest: "/root"
+aap_backup_dest: "../backup"
 aap_backup_async: 10000
 aap_backup_poll: 20
+
+# AWS Bucket information
+s3_bucket_name: jleonper-myawsbucket
+s3_region: us-east-1
+
 
 # Restore variables
 aap_setup_working_dir: "{{ aap_setup_prep_setup_dir }}" # Must be set, though if the aap_setup_prepare role has been run prior, a fact will be set.
 #aap_restore_location: "{{ aap_setup_working_dir }}/{{ aap_restore_file }}"
-aap_restore_location: "{{ aap_backup_dest }}/aap-backup-latest"
+aap_restore_location: "../restore/aap-backup-latest"
